@@ -32,6 +32,8 @@
     <string name="translation_target_label">Traduci in</string>
     <string name="audio_route_phone">Telefono</string>
     <string name="audio_route_glasses">Occhiali</string>
+    <string name="translation_role_you">Tu</string>
+    <string name="translation_role_other">Interlocutore</string>
 
     <!-- Language picker -->
     <string name="language_picker_title">Lingua</string>

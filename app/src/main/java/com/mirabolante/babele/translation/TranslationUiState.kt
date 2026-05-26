@@ -10,11 +10,16 @@ data class TranslationTurn(
     val sourceText: String,
     val translatedText: String,
     val isFinal: Boolean,
+    // true if the user (language X) spoke this turn → translation went to the phone speaker.
+    // false if the other person (language Y) spoke → translation went to the glasses.
+    val spokenByUser: Boolean,
 )
 
 data class TranslationUiState(
-    val targetLanguage: LanguageOption = LanguageOption.ENGLISH,
-    val useGlassesAudio: Boolean = false,
+    // X = the user's own language. The user hears Y→X translations on the GLASSES.
+    val languageX: LanguageOption = LanguageOption.ITALIAN,
+    // Y = the other person's language. They hear X→Y translations on the PHONE speaker.
+    val languageY: LanguageOption = LanguageOption.ENGLISH,
     val status: TranslationStatus = TranslationStatus.IDLE,
     val turns: ImmutableList<TranslationTurn> = persistentListOf(),
     val errorMessage: String? = null,

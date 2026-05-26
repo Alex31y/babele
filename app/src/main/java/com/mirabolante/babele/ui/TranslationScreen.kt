@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Sensors
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +47,8 @@ import com.mirabolante.babele.translation.TranslationStatus
 import com.mirabolante.babele.translation.TranslationTurn
 import com.mirabolante.babele.translation.TranslationViewModel
 
+private enum class LanguageSlot { X, Y }
+
 @Composable
 fun TranslationScreen(
     viewModel: TranslationViewModel,
@@ -54,7 +56,7 @@ fun TranslationScreen(
     modifier: Modifier = Modifier,
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-  var pickerOpen by remember { mutableStateOf(false) }
+  var pickerOpen by remember { mutableStateOf<LanguageSlot?>(null) }
   val listState = rememberLazyListState()
 
   LaunchedEffect(uiState.turns.size) {
@@ -71,18 +73,13 @@ fun TranslationScreen(
   ) {
     TopBar(onBack = onBack)
 
-    TargetLanguageCard(
-        language = uiState.targetLanguage,
+    LanguageRow(
+        languageX = uiState.languageX,
+        languageY = uiState.languageY,
         enabled = !uiState.isActive,
-        onClick = { pickerOpen = true },
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    AudioRouteToggle(
-        useGlasses = uiState.useGlassesAudio,
-        enabled = !uiState.isActive,
-        onSelect = { viewModel.setUseGlassesAudio(it) },
+        onPickX = { pickerOpen = LanguageSlot.X },
+        onPickY = { pickerOpen = LanguageSlot.Y },
+        onSwap = { viewModel.swapLanguages() },
     )
 
     Spacer(modifier = Modifier.height(12.dp))
@@ -120,13 +117,16 @@ fun TranslationScreen(
     Spacer(modifier = Modifier.height(16.dp))
   }
 
-  if (pickerOpen) {
+  pickerOpen?.let { slot ->
     LanguagePickerSheet(
         onPick = { picked ->
-          viewModel.setTargetLanguage(picked)
-          pickerOpen = false
+          when (slot) {
+            LanguageSlot.X -> viewModel.setLanguageX(picked)
+            LanguageSlot.Y -> viewModel.setLanguageY(picked)
+          }
+          pickerOpen = null
         },
-        onDismiss = { pickerOpen = false },
+        onDismiss = { pickerOpen = null },
     )
   }
 }
@@ -152,131 +152,137 @@ private fun TopBar(onBack: () -> Unit) {
 }
 
 @Composable
-private fun TargetLanguageCard(
-    language: LanguageOption,
+private fun LanguageRow(
+    languageX: LanguageOption,
+    languageY: LanguageOption,
     enabled: Boolean,
-    onClick: () -> Unit,
+    onPickX: () -> Unit,
+    onPickY: () -> Unit,
+    onSwap: () -> Unit,
 ) {
-  Surface(
-      modifier = Modifier.fillMaxWidth().clickable(enabled = enabled) { onClick() },
-      color = MaterialTheme.colorScheme.surfaceContainer,
-      shape = MaterialTheme.shapes.large,
-  ) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Text(text = language.flagEmoji, style = MaterialTheme.typography.displaySmall)
-      Spacer(modifier = Modifier.width(16.dp))
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-            text = stringResource(R.string.translation_target_label),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = language.displayName,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-      }
-    }
-  }
-}
-
-@Composable
-private fun AudioRouteToggle(
-    useGlasses: Boolean,
-    enabled: Boolean,
-    onSelect: (Boolean) -> Unit,
-) {
-  Surface(
+  Row(
       modifier = Modifier.fillMaxWidth(),
-      color = MaterialTheme.colorScheme.surfaceContainerLow,
-      shape = MaterialTheme.shapes.large,
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    Row(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
-      RouteSegment(
-          icon = Icons.Default.Phone,
-          label = stringResource(R.string.audio_route_phone),
-          selected = !useGlasses,
-          enabled = enabled,
-          modifier = Modifier.weight(1f),
-          onClick = { onSelect(false) },
-      )
-      RouteSegment(
-          icon = Icons.Default.Sensors,
-          label = stringResource(R.string.audio_route_glasses),
-          selected = useGlasses,
-          enabled = enabled,
-          modifier = Modifier.weight(1f),
-          onClick = { onSelect(true) },
+    LanguageTile(
+        language = languageX,
+        roleLabel = stringResource(R.string.translation_role_you),
+        routeIcon = Icons.Default.Sensors,
+        routeLabel = stringResource(R.string.audio_route_glasses),
+        enabled = enabled,
+        modifier = Modifier.weight(1f),
+        onClick = onPickX,
+    )
+    IconButton(onClick = onSwap, enabled = enabled, modifier = Modifier.size(44.dp)) {
+      Icon(
+          imageVector = Icons.Default.SwapHoriz,
+          contentDescription = stringResource(R.string.translation_swap_languages),
       )
     }
+    LanguageTile(
+        language = languageY,
+        roleLabel = stringResource(R.string.translation_role_other),
+        routeIcon = Icons.Default.Phone,
+        routeLabel = stringResource(R.string.audio_route_phone),
+        enabled = enabled,
+        modifier = Modifier.weight(1f),
+        onClick = onPickY,
+    )
   }
 }
 
 @Composable
-private fun RouteSegment(
-    icon: ImageVector,
-    label: String,
-    selected: Boolean,
+private fun LanguageTile(
+    language: LanguageOption,
+    roleLabel: String,
+    routeIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    routeLabel: String,
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-  val bg = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLow
-  val fg = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
   Surface(
       modifier = modifier.clickable(enabled = enabled) { onClick() },
-      color = bg,
-      shape = MaterialTheme.shapes.medium,
+      color = MaterialTheme.colorScheme.surfaceContainer,
+      shape = MaterialTheme.shapes.large,
   ) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 8.dp),
     ) {
-      Icon(imageVector = icon, contentDescription = null, tint = fg, modifier = Modifier.size(20.dp))
-      Spacer(modifier = Modifier.width(8.dp))
-      Text(text = label, style = MaterialTheme.typography.labelLarge, color = fg)
+      Text(
+          text = roleLabel,
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+      Text(text = language.flagEmoji, style = MaterialTheme.typography.displaySmall)
+      Text(
+          text = language.displayName,
+          style = MaterialTheme.typography.titleSmall,
+          color = MaterialTheme.colorScheme.onSurface,
+          maxLines = 1,
+      )
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = routeIcon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(14.dp),
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = routeLabel,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+      }
     }
   }
 }
 
 @Composable
 private fun TurnBubble(turn: TranslationTurn) {
-  Surface(
-      modifier = Modifier.fillMaxWidth(),
-      color = MaterialTheme.colorScheme.surfaceContainer,
-      shape = MaterialTheme.shapes.large,
-  ) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+  // User-spoken turns (X→Y, phone) align left; other-spoken (Y→X, glasses) align right.
+  val alignEnd = !turn.spokenByUser
+  val container =
+      if (alignEnd) MaterialTheme.colorScheme.primaryContainer
+      else MaterialTheme.colorScheme.surfaceContainer
+  val onContainer =
+      if (alignEnd) MaterialTheme.colorScheme.onPrimaryContainer
+      else MaterialTheme.colorScheme.onSurface
+  Row(modifier = Modifier.fillMaxWidth()) {
+    if (alignEnd) Spacer(modifier = Modifier.weight(0.12f))
+    Surface(
+        modifier = Modifier.weight(0.88f),
+        color = container,
+        shape = MaterialTheme.shapes.large,
     ) {
-      if (turn.sourceText.isNotEmpty()) {
-        Text(
-            text = turn.sourceText,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-      if (turn.translatedText.isNotEmpty()) {
-        Text(
-            text = turn.translatedText,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-      } else if (turn.sourceText.isNotEmpty() && !turn.isFinal) {
-        Text(
-            text = "…",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
+      Column(
+          modifier = Modifier.fillMaxWidth().padding(16.dp),
+          verticalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        if (turn.sourceText.isNotEmpty()) {
+          Text(
+              text = turn.sourceText,
+              style = MaterialTheme.typography.bodyMedium,
+              color = onContainer.copy(alpha = 0.7f),
+          )
+        }
+        if (turn.translatedText.isNotEmpty()) {
+          Text(
+              text = turn.translatedText,
+              style = MaterialTheme.typography.titleMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = onContainer,
+          )
+        } else if (turn.sourceText.isNotEmpty() && !turn.isFinal) {
+          Text(text = "…", style = MaterialTheme.typography.titleMedium, color = onContainer)
+        }
       }
     }
+    if (!alignEnd) Spacer(modifier = Modifier.weight(0.12f))
   }
 }
 

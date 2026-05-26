@@ -61,6 +61,7 @@ dependencies {
   implementation(libs.androidx.material3)
   implementation(libs.kotlinx.collections.immutable)
   implementation(libs.okhttp)
+  implementation(libs.mlkit.language.id)
   androidTestImplementation(libs.androidx.ui.test.junit4)
   androidTestImplementation(libs.androidx.test.uiautomator)
   androidTestImplementation(libs.androidx.test.rules)

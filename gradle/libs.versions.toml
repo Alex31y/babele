@@ -9,6 +9,7 @@ uiAutomator = "2.3.0"
 testRules = "1.5.0"
 uiJunit4 = "1.6.1"
 okhttp = "4.12.0"
+mlkitLanguageId = "17.0.6"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -22,6 +23,7 @@ androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiaut
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "testRules" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "uiJunit4" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+mlkit-language-id = { group = "com.google.mlkit", name = "language-id", version.ref = "mlkitLanguageId" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
