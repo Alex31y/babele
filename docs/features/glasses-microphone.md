@@ -25,7 +25,8 @@ Imposta `AudioManager.mode = MODE_IN_COMMUNICATION` una volta all'inizio della s
 
 | File / simbolo | Ruolo |
 | --- | --- |
-| `gemini/GeminiMicInput.audioFlow` | Cold flow dei chunk PCM mic |
+| `gemini/GeminiMicInput.audioFlow` | Cold flow dei chunk PCM dal mic **degli occhiali** (BT SCO) |
+| `gemini/GeminiMicInput.phoneAudioFlow` | Cold flow dal mic **del telefono** (`VOICE_RECOGNITION`, no SCO, no comm mode) — usato in modalità telefono |
 | `gemini/GeminiMicInput.enterCommunicationMode` / `exitCommunicationMode` | Lifecycle di `MODE_IN_COMMUNICATION` |
 | `gemini/GeminiMicInput.hasGlassesMic` | Pre-check sincrono: gli occhiali sono esposti come device BT? |
 | `gemini/GeminiMicInput.findGlassesCommunicationDevice` | Selezione endpoint BT degli occhiali |

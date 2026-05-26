@@ -7,12 +7,20 @@ Riproduce i chunk PCM 24 kHz mono 16-bit della voce di Gemini su **uno di due ou
 - **Telefono** (`USAGE_MEDIA`, pinnato allo speaker built-in) — per le traduzioni che deve sentire l'**altra persona**.
 - **Occhiali** (`USAGE_VOICE_COMMUNICATION` via BT SCO) — per le traduzioni che deve sentire solo l'**utente**.
 
-Entrambi gli `AudioTrack` sono creati all'avvio e tenuti vivi insieme: cambiare direzione tra un turno e l'altro è a **latenza zero**.
+In **modalità occhiali** entrambi gli `AudioTrack` sono creati all'avvio e tenuti vivi insieme: cambiare direzione tra un turno e l'altro è a **latenza zero**. In **modalità telefono** viene creata solo la traccia telefono e tutto esce da lì.
+
+## Modalità telefono vs occhiali
+
+`start(withGlasses: Boolean)`:
+- `withGlasses = true` (modalità occhiali): crea traccia telefono **e** traccia occhiali; `enqueue(pcm, toGlasses)` instrada sulla cassa decisa dal rilevamento lingua.
+- `withGlasses = false` (modalità telefono): crea **solo** la traccia telefono. `enqueue(pcm, toGlasses)` fa fallback alla traccia telefono quando quella occhiali è `null`, quindi tutto esce dallo speaker.
+
+La modalità telefono non usa BT SCO né `MODE_IN_COMMUNICATION`: l'audio `USAGE_MEDIA` esce a volume pieno e bassa latenza senza le complicazioni della comm mode.
 
 ## Flusso a parole
 
-### Avvio (`start()`)
-Crea due tracce con `buildTrack(routeToGlasses)`:
+### Avvio (`start(withGlasses)`)
+Crea la traccia telefono (e, se `withGlasses`, quella occhiali) con `buildTrack(routeToGlasses)`:
 - **Phone**: `USAGE_MEDIA` + `setPreferredDevice(BUILTIN_SPEAKER)`.
 - **Glasses**: `USAGE_VOICE_COMMUNICATION` + `setCommunicationDevice(BT-SCO)` + `setPreferredDevice(BT-SCO)`; memorizza `ownsCommunicationDevice`.
 

@@ -83,7 +83,7 @@ You are a professional real-time interpreter between {X} and {Y}.
 - **`buffer(Channel.UNLIMITED)`**: il modello native-audio fa burst ~5× real-time; senza buffer illimitato si perdono chunk audio.
 - **`languageCode = null` per bidirezionale**: forzarlo bloccherebbe l'output su una sola lingua.
 - **Mic gate essenziale con output sugli occhiali**: il feedback acustico mic↔casse degli occhiali è altissimo (sono a pochi cm). Senza gate, loop di interruzioni.
-- **Sicurezza**: l'API key esce dritta da `BuildConfig` alla URL WSS. Ok per un sample, **non** per produzione (servirebbe ephemeral token).
+- **Chiave BYOK**: il `GeminiLiveClient` riceve la key nel costruttore; `TranslationViewModel` la legge da `ApiKeyStore.effectiveKey()` (la key dell'utente, vedi [api-key-byok](api-key-byok.md)). Esce dritta nella URL WSS: ok per uso personale/BYOK, **non** hardened (servirebbe ephemeral token).
 
 ## Estendere
 
