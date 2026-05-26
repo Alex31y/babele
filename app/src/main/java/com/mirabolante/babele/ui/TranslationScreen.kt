@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mirabolante.babele.R
+import com.mirabolante.babele.translation.AudioMode
 import com.mirabolante.babele.translation.LanguageOption
 import com.mirabolante.babele.translation.TranslationStatus
 import com.mirabolante.babele.translation.TranslationTurn
@@ -73,9 +74,18 @@ fun TranslationScreen(
   ) {
     TopBar(onBack = onBack)
 
+    ModeToggle(
+        mode = uiState.audioMode,
+        enabled = !uiState.isActive,
+        onSelect = { viewModel.setAudioMode(it) },
+    )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
     LanguageRow(
         languageX = uiState.languageX,
         languageY = uiState.languageY,
+        glassesMode = uiState.audioMode == AudioMode.GLASSES,
         enabled = !uiState.isActive,
         onPickX = { pickerOpen = LanguageSlot.X },
         onPickY = { pickerOpen = LanguageSlot.Y },
@@ -152,9 +162,70 @@ private fun TopBar(onBack: () -> Unit) {
 }
 
 @Composable
+private fun ModeToggle(
+    mode: AudioMode,
+    enabled: Boolean,
+    onSelect: (AudioMode) -> Unit,
+) {
+  Surface(
+      modifier = Modifier.fillMaxWidth(),
+      color = MaterialTheme.colorScheme.surfaceContainerLow,
+      shape = MaterialTheme.shapes.large,
+  ) {
+    Row(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+      ModeSegment(
+          icon = Icons.Default.Sensors,
+          label = stringResource(R.string.mode_glasses),
+          selected = mode == AudioMode.GLASSES,
+          enabled = enabled,
+          modifier = Modifier.weight(1f),
+          onClick = { onSelect(AudioMode.GLASSES) },
+      )
+      ModeSegment(
+          icon = Icons.Default.Phone,
+          label = stringResource(R.string.mode_phone),
+          selected = mode == AudioMode.PHONE,
+          enabled = enabled,
+          modifier = Modifier.weight(1f),
+          onClick = { onSelect(AudioMode.PHONE) },
+      )
+    }
+  }
+}
+
+@Composable
+private fun ModeSegment(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    selected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+  val bg = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerLow
+  val fg = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+  Surface(
+      modifier = modifier.clickable(enabled = enabled) { onClick() },
+      color = bg,
+      shape = MaterialTheme.shapes.medium,
+  ) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(imageVector = icon, contentDescription = null, tint = fg, modifier = Modifier.size(20.dp))
+      Spacer(modifier = Modifier.width(8.dp))
+      Text(text = label, style = MaterialTheme.typography.labelLarge, color = fg)
+    }
+  }
+}
+
+@Composable
 private fun LanguageRow(
     languageX: LanguageOption,
     languageY: LanguageOption,
+    glassesMode: Boolean,
     enabled: Boolean,
     onPickX: () -> Unit,
     onPickY: () -> Unit,
@@ -168,8 +239,11 @@ private fun LanguageRow(
     LanguageTile(
         language = languageX,
         roleLabel = stringResource(R.string.translation_role_you),
-        routeIcon = Icons.Default.Sensors,
-        routeLabel = stringResource(R.string.audio_route_glasses),
+        // In phone mode both outputs go to the phone speaker.
+        routeIcon = if (glassesMode) Icons.Default.Sensors else Icons.Default.Phone,
+        routeLabel =
+            if (glassesMode) stringResource(R.string.audio_route_glasses)
+            else stringResource(R.string.audio_route_phone),
         enabled = enabled,
         modifier = Modifier.weight(1f),
         onClick = onPickX,

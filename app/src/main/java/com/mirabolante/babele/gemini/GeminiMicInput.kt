@@ -36,10 +36,10 @@ class GeminiMicInput(private val context: Context) {
     private const val CHUNK_BYTES = 3200 // 100 ms @ 16 kHz mono 16-bit
   }
 
-  class MicNotFoundException : IllegalStateException("Microfono degli occhiali non trovato")
+  class MicNotFoundException : IllegalStateException("Glasses microphone not found")
 
   class MicPermissionMissingException :
-      SecurityException("Permesso RECORD_AUDIO non concesso")
+      SecurityException("RECORD_AUDIO permission not granted")
 
   private val audioManager: AudioManager =
       context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -182,6 +182,70 @@ class GeminiMicInput(private val context: Context) {
         Log.w(TAG, "clearCommunicationDevice failed", e)
       }
       Log.d(TAG, "Mic capture stopped")
+    }
+
+    awaitClose {}
+  }.flowOn(Dispatchers.IO)
+
+  /**
+   * Phone-only capture: records from the phone's built-in microphone. No Bluetooth, no SCO, no
+   * MODE_IN_COMMUNICATION — so playback through the phone speaker stays at full media volume and
+   * low latency. Used when the user runs Babele as a standalone phone translator (no glasses).
+   */
+  fun phoneAudioFlow(): Flow<ByteArray> = callbackFlow {
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) !=
+        PackageManager.PERMISSION_GRANTED) {
+      throw MicPermissionMissingException()
+    }
+    _lastDeviceName.value = "Phone mic"
+
+    val minBuffer =
+        AudioRecord.getMinBufferSize(
+            SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
+    val bufferBytes = (minBuffer * 4).coerceAtLeast(CHUNK_BYTES * 4)
+
+    @SuppressLint("MissingPermission")
+    val recorder =
+        AudioRecord(
+            MediaRecorder.AudioSource.VOICE_RECOGNITION,
+            SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+            bufferBytes,
+        )
+    Log.d(TAG, "Phone AudioRecord built (state=${recorder.state})")
+
+    try {
+      recorder.startRecording()
+      val buf = ByteArray(CHUNK_BYTES)
+      var statsChunks = 0
+      var statsBytes = 0
+      var lastStatsMs = System.currentTimeMillis()
+      while (!isClosedForSend) {
+        val read = recorder.read(buf, 0, buf.size, AudioRecord.READ_BLOCKING)
+        if (read > 0) {
+          trySend(if (read == buf.size) buf.copyOf() else buf.copyOf(read))
+          statsChunks++
+          statsBytes += read
+          val now = System.currentTimeMillis()
+          if (now - lastStatsMs >= 1000) {
+            Log.d(TAG, "phone mic 1s: chunks=$statsChunks bytes=$statsBytes")
+            statsChunks = 0
+            statsBytes = 0
+            lastStatsMs = now
+          }
+        } else if (read < 0) {
+          Log.w(TAG, "Phone AudioRecord.read returned $read, stopping")
+          break
+        }
+      }
+    } catch (e: Throwable) {
+      Log.e(TAG, "Phone mic capture loop failed", e)
+      throw e
+    } finally {
+      try { recorder.stop() } catch (_: IllegalStateException) {}
+      recorder.release()
+      Log.d(TAG, "Phone mic capture stopped")
     }
 
     awaitClose {}

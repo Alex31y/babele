@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.mlkit.nl.languageid.LanguageIdentification
 import com.google.mlkit.nl.languageid.LanguageIdentifier
+import com.mirabolante.babele.config.ApiKeyStore
 import com.mirabolante.babele.gemini.GeminiAudioPlayer
 import com.mirabolante.babele.gemini.GeminiEvent
 import com.mirabolante.babele.gemini.GeminiLiveClient
@@ -33,10 +34,10 @@ class TranslationViewModel(application: Application) : AndroidViewModel(applicat
   private val _uiState = MutableStateFlow(TranslationUiState())
   val uiState: StateFlow<TranslationUiState> = _uiState.asStateFlow()
 
-  private val geminiClient = GeminiLiveClient()
   private val geminiPlayer = GeminiAudioPlayer(application)
   private val micInput = GeminiMicInput(application)
   private val languageIdentifier: LanguageIdentifier = LanguageIdentification.getClient()
+  private val apiKeyStore = ApiKeyStore(application)
 
   private var sessionJob: Job? = null
   private var nextTurnId = 1L
@@ -63,21 +64,27 @@ class TranslationViewModel(application: Application) : AndroidViewModel(applicat
     _uiState.update { it.copy(languageX = it.languageY, languageY = it.languageX) }
   }
 
+  fun setAudioMode(mode: AudioMode) {
+    if (uiState.value.isActive) return
+    _uiState.update { it.copy(audioMode = mode) }
+  }
+
   fun start() {
     if (sessionJob != null) return
     val state = _uiState.value
 
     if (state.languageX == state.languageY) {
       _uiState.update {
-        it.copy(status = TranslationStatus.ERROR, errorMessage = "Scegli due lingue diverse")
+        it.copy(status = TranslationStatus.ERROR, errorMessage = "Pick two different languages")
       }
       return
     }
-    if (!micInput.hasGlassesMic()) {
+    val glassesMode = state.audioMode == AudioMode.GLASSES
+    if (glassesMode && !micInput.hasGlassesMic()) {
       _uiState.update {
         it.copy(
             status = TranslationStatus.ERROR,
-            errorMessage = "Microfono occhiali non trovato. Accoppia i Ray-Ban Meta come cuffie BT.",
+            errorMessage = "Glasses mic not found. Pair the Ray-Ban Meta as a Bluetooth headset, or switch to Phone mode.",
         )
       }
       return
@@ -91,17 +98,19 @@ class TranslationViewModel(application: Application) : AndroidViewModel(applicat
       it.copy(status = TranslationStatus.STARTING, errorMessage = null, turns = persistentListOf())
     }
 
-    micInput.enterCommunicationMode()
-    geminiPlayer.start()
+    if (glassesMode) micInput.enterCommunicationMode()
+    geminiPlayer.start(withGlasses = glassesMode)
 
     val prompt = buildTranslationPrompt(state.languageX, state.languageY)
-    Log.d(TAG, "Starting bidirectional translation ${state.languageX.bcp47} <-> ${state.languageY.bcp47}")
+    val micFlow = if (glassesMode) micInput.audioFlow() else micInput.phoneAudioFlow()
+    Log.d(TAG, "Starting translation ${state.languageX.bcp47} <-> ${state.languageY.bcp47}, mode=${state.audioMode}")
 
+    val client = GeminiLiveClient(apiKeyStore.effectiveKey())
     sessionJob =
         viewModelScope.launch {
           try {
-            geminiClient
-                .translate(systemPrompt = prompt, languageCode = null, audioFlow = micInput.audioFlow())
+            client
+                .translate(systemPrompt = prompt, languageCode = null, audioFlow = micFlow)
                 .collect { event -> handleEvent(event) }
           } catch (e: Throwable) {
             Log.e(TAG, "Session collect failed", e)

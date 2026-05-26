@@ -2,7 +2,6 @@ package com.mirabolante.babele.gemini
 
 import android.util.Base64
 import android.util.Log
-import com.mirabolante.babele.BuildConfig
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CompletableDeferred
@@ -35,7 +34,7 @@ import org.json.JSONObject
  * No video, no images. Session resumption keeps the conversation alive past server-side
  * rolling close (goAway) so translations can continue indefinitely.
  */
-class GeminiLiveClient(private val apiKey: String = BuildConfig.GEMINI_API_KEY) {
+class GeminiLiveClient(private val apiKey: String) {
 
   companion object {
     private const val TAG = "GeminiLiveClient"
@@ -71,7 +70,7 @@ class GeminiLiveClient(private val apiKey: String = BuildConfig.GEMINI_API_KEY) 
       callbackFlow {
         if (apiKey.isBlank()) {
           Log.e(TAG, "GEMINI_API_KEY blank")
-          trySend(GeminiEvent.Error("GEMINI_API_KEY mancante in local.properties"))
+          trySend(GeminiEvent.Error("GEMINI_API_KEY missing in local.properties"))
           close()
           return@callbackFlow
         }
@@ -119,7 +118,7 @@ class GeminiLiveClient(private val apiKey: String = BuildConfig.GEMINI_API_KEY) 
                     consecutiveFailures++
                     if (consecutiveFailures > MAX_RECONNECT_ATTEMPTS) {
                       Log.e(TAG, "Giving up after $consecutiveFailures failed reconnect attempts")
-                      trySend(GeminiEvent.Error("Connessione persa, riprova"))
+                      trySend(GeminiEvent.Error("Connection lost, please retry"))
                       break
                     }
                     Log.w(TAG, "Reconnect attempt #$consecutiveFailures after failure")
@@ -193,7 +192,7 @@ class GeminiLiveClient(private val apiKey: String = BuildConfig.GEMINI_API_KEY) 
               if (code == 1000) {
                 outcome.complete(SessionOutcome.TERMINAL)
               } else {
-                onEvent(GeminiEvent.Error("WS chiuso: $code $reason"))
+                onEvent(GeminiEvent.Error("WebSocket closed: $code $reason"))
                 outcome.complete(SessionOutcome.RETRY_AFTER_FAILURE)
               }
             }

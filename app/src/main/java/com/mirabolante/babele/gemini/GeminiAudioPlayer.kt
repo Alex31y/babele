@@ -33,11 +33,16 @@ class GeminiAudioPlayer(private val context: Context) {
   private var glassesTrack: AudioTrack? = null
   private var ownsCommunicationDevice = false
 
+  /**
+   * @param withGlasses when true, also creates the glasses (BT SCO) track for per-turn routing.
+   *   When false (phone-only mode), only the phone speaker track is created and everything plays
+   *   through it.
+   */
   @Synchronized
-  fun start() {
+  fun start(withGlasses: Boolean) {
     if (phoneTrack != null || glassesTrack != null) return
     phoneTrack = buildTrack(routeToGlasses = false)
-    glassesTrack = buildTrack(routeToGlasses = true)
+    if (withGlasses) glassesTrack = buildTrack(routeToGlasses = true)
   }
 
   private fun buildTrack(routeToGlasses: Boolean): AudioTrack {
@@ -107,7 +112,8 @@ class GeminiAudioPlayer(private val context: Context) {
 
   @Synchronized
   fun enqueue(pcm: ByteArray, toGlasses: Boolean) {
-    val t = (if (toGlasses) glassesTrack else phoneTrack) ?: return
+    // In phone-only mode glassesTrack is null, so everything falls back to the phone speaker.
+    val t = (if (toGlasses) glassesTrack else phoneTrack) ?: phoneTrack ?: return
     try {
       val written = t.write(pcm, 0, pcm.size, AudioTrack.WRITE_BLOCKING)
       if (written < 0) Log.w(TAG, "AudioTrack.write returned $written (toGlasses=$toGlasses)")

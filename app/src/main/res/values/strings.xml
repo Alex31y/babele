@@ -4,37 +4,65 @@
 
     <!-- Home screen -->
     <string name="home_title">Babele</string>
-    <string name="home_subtitle">Interprete vocale in tempo reale per Ray-Ban Meta</string>
-    <string name="home_step_pair_title">1. Accoppia gli occhiali</string>
-    <string name="home_step_pair_body">Accendi i tuoi Ray-Ban Meta e accoppiali come cuffie Bluetooth nelle impostazioni del telefono.</string>
-    <string name="home_step_languages_title">2. Scegli le lingue</string>
-    <string name="home_step_languages_body">Seleziona la tua lingua e quella dell\'interlocutore prima di iniziare.</string>
-    <string name="home_step_talk_title">3. Parlate</string>
-    <string name="home_step_talk_body">Il microfono degli occhiali cattura entrambe le voci. La traduzione esce dallo speaker del telefono.</string>
-    <string name="home_open_bt_settings">Apri impostazioni Bluetooth</string>
-    <string name="home_continue">Continua</string>
-    <string name="home_permission_needed">Servono i permessi Bluetooth e microfono per usare gli occhiali.</string>
+    <string name="home_subtitle">Real-time voice interpreter</string>
+    <string name="home_step_pair_title">1. Pair your glasses</string>
+    <string name="home_step_pair_body">Turn on your Ray-Ban Meta and pair them as a Bluetooth headset in your phone settings. (Glasses mode only.)</string>
+    <string name="home_step_languages_title">2. Pick the languages</string>
+    <string name="home_step_languages_body">Choose your language and the other person\'s language before you start.</string>
+    <string name="home_step_talk_title">3. Talk</string>
+    <string name="home_step_talk_body">The mic picks up the speech and the translation plays back automatically.</string>
+    <string name="home_choose_mode">How do you want to use Babele?</string>
+    <string name="home_mode_glasses_title">With glasses</string>
+    <string name="home_mode_glasses_body">Use the Ray-Ban Meta mic and speakers.</string>
+    <string name="home_mode_phone_title">Phone only</string>
+    <string name="home_mode_phone_body">The phone is the translator: its mic listens, its speaker plays back.</string>
+    <string name="home_glasses_setup_title">Glasses setup</string>
+    <string name="home_open_bt_settings">Open Bluetooth settings</string>
+    <string name="home_continue">Start</string>
+    <string name="home_back">Back</string>
+    <string name="home_permission_needed">Bluetooth and microphone permissions are required.</string>
 
     <!-- Translation screen -->
-    <string name="translation_title">Traduzione live</string>
-    <string name="translation_select_language">Seleziona lingua</string>
-    <string name="translation_swap_languages">Inverti lingue</string>
-    <string name="translation_start">Avvia traduzione</string>
-    <string name="translation_stop">Termina traduzione</string>
-    <string name="translation_status_idle">Pronto. Tocca Avvia.</string>
-    <string name="translation_status_starting">Connessione…</string>
-    <string name="translation_status_listening">In ascolto…</string>
-    <string name="translation_status_translating">Traduco…</string>
-    <string name="translation_error_prefix">Errore: %1$s</string>
-    <string name="translation_mic_not_found">Microfono occhiali non trovato. Verifica che i Ray-Ban Meta siano accoppiati come cuffia Bluetooth.</string>
-    <string name="translation_empty_hint">Inizia a parlare e ascolta la traduzione.</string>
-    <string name="translation_back">Indietro</string>
-    <string name="translation_target_label">Traduci in</string>
-    <string name="audio_route_phone">Telefono</string>
-    <string name="audio_route_glasses">Occhiali</string>
-    <string name="translation_role_you">Tu</string>
-    <string name="translation_role_other">Interlocutore</string>
+    <string name="translation_title">Live translation</string>
+    <string name="translation_select_language">Select language</string>
+    <string name="translation_swap_languages">Swap languages</string>
+    <string name="translation_start">Start translation</string>
+    <string name="translation_stop">Stop translation</string>
+    <string name="translation_status_idle">Ready. Tap Start.</string>
+    <string name="translation_status_starting">Connecting…</string>
+    <string name="translation_status_listening">Listening…</string>
+    <string name="translation_status_translating">Translating…</string>
+    <string name="translation_error_prefix">Error: %1$s</string>
+    <string name="translation_mic_not_found">Glasses microphone not found. Make sure the Ray-Ban Meta are paired as a Bluetooth headset.</string>
+    <string name="translation_empty_hint">Start speaking and listen to the translation.</string>
+    <string name="translation_back">Back</string>
+    <string name="translation_target_label">Translate to</string>
+    <string name="audio_route_phone">Phone</string>
+    <string name="audio_route_glasses">Glasses</string>
+    <string name="translation_role_you">You</string>
+    <string name="translation_role_other">Other person</string>
+    <string name="mode_glasses">Glasses</string>
+    <string name="mode_phone">Phone</string>
 
     <!-- Language picker -->
-    <string name="language_picker_title">Lingua</string>
+    <string name="language_picker_title">Language</string>
+
+    <!-- API key (BYOK) -->
+    <string name="key_title">Gemini API key</string>
+    <string name="key_intro">Babele translates using Google\'s Gemini API. To use the app you need your own API key — it\'s free to start and takes about a minute to create.</string>
+    <string name="key_what_is">What\'s an API key? It\'s a personal password that lets this app talk to Google\'s AI on your behalf. Usage is billed to your own Google account, so you stay in control.</string>
+    <string name="key_steps_title">How to get one</string>
+    <string name="key_step1">1. Tap \"Get a free key\" below — it opens Google AI Studio.</string>
+    <string name="key_step2">2. Sign in with your Google account.</string>
+    <string name="key_step3">3. Tap \"Create API key\", then copy it.</string>
+    <string name="key_step4">4. Come back here, paste it, and tap Save.</string>
+    <string name="key_get_button">Get a free key</string>
+    <string name="key_field_label">Paste your API key here</string>
+    <string name="key_field_placeholder">AIza…</string>
+    <string name="key_save">Save key</string>
+    <string name="key_clear">Remove key</string>
+    <string name="key_privacy">Your key is stored only on this device and is sent solely to Google\'s API. It is never shared with anyone else.</string>
+    <string name="key_invalid">That doesn\'t look like a valid key. Gemini keys usually start with \"AIza\".</string>
+    <string name="key_settings">API key</string>
+    <string name="key_close">Close</string>
 </resources>
