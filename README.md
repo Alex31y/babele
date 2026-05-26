@@ -114,7 +114,9 @@ Issues and PRs welcome. Please keep changes focused and describe how you tested 
 
 ## License
 
-Choose and add a license before publishing (e.g. MIT). Note that the audio/Gemini integration patterns were derived from Meta's official **CameraAccess** Device Access Toolkit sample — check its license terms if you reuse code from it.
+Released under the [MIT License](LICENSE).
+
+Note that the audio/Gemini integration patterns were derived from Meta's official **CameraAccess** Device Access Toolkit sample — check its license terms if you reuse code from it.
 
 ## Acknowledgements
 
