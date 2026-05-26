@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Babele</string>
+
+    <!-- Home screen -->
+    <string name="home_title">Babele</string>
+    <string name="home_subtitle">Interprete vocale in tempo reale per Ray-Ban Meta</string>
+    <string name="home_step_pair_title">1. Accoppia gli occhiali</string>
+    <string name="home_step_pair_body">Accendi i tuoi Ray-Ban Meta e accoppiali come cuffie Bluetooth nelle impostazioni del telefono.</string>
+    <string name="home_step_languages_title">2. Scegli le lingue</string>
+    <string name="home_step_languages_body">Seleziona la tua lingua e quella dell\'interlocutore prima di iniziare.</string>
+    <string name="home_step_talk_title">3. Parlate</string>
+    <string name="home_step_talk_body">Il microfono degli occhiali cattura entrambe le voci. La traduzione esce dallo speaker del telefono.</string>
+    <string name="home_open_bt_settings">Apri impostazioni Bluetooth</string>
+    <string name="home_continue">Continua</string>
+    <string name="home_permission_needed">Servono i permessi Bluetooth e microfono per usare gli occhiali.</string>
+
+    <!-- Translation screen -->
+    <string name="translation_title">Traduzione live</string>
+    <string name="translation_select_language">Seleziona lingua</string>
+    <string name="translation_swap_languages">Inverti lingue</string>
+    <string name="translation_start">Avvia traduzione</string>
+    <string name="translation_stop">Termina traduzione</string>
+    <string name="translation_status_idle">Pronto. Tocca Avvia.</string>
+    <string name="translation_status_starting">Connessione…</string>
+    <string name="translation_status_listening">In ascolto…</string>
+    <string name="translation_status_translating">Traduco…</string>
+    <string name="translation_error_prefix">Errore: %1$s</string>
+    <string name="translation_mic_not_found">Microfono occhiali non trovato. Verifica che i Ray-Ban Meta siano accoppiati come cuffia Bluetooth.</string>
+    <string name="translation_empty_hint">Inizia a parlare e ascolta la traduzione.</string>
+    <string name="translation_back">Indietro</string>
+    <string name="translation_target_label">Traduci in</string>
+    <string name="audio_route_phone">Telefono</string>
+    <string name="audio_route_glasses">Occhiali</string>
+
+    <!-- Language picker -->
+    <string name="language_picker_title">Lingua</string>
+</resources>

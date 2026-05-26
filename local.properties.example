@@ -1,0 +1,6 @@
+# Copy this file to local.properties and fill in:
+#
+#   sdk.dir=C:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
+#   GEMINI_API_KEY=AIza...
+#
+# GEMINI_API_KEY can also be set via env var.

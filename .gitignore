@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+build/
+/app/build/
+/app/release/
+captures/
+
+# Local config / secrets (contains GEMINI_API_KEY and sdk.dir)
+local.properties
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+*.hprof
+
+# Native build
+.externalNativeBuild/
+.cxx/
+
+# Keystore (don't commit signing keys)
+*.jks
+*.keystore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
